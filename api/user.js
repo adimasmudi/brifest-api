@@ -6,6 +6,19 @@ const User = require("../models/User");
 // bcrypt for password encryption
 const bcrypt = require("bcrypt");
 
+// get data user
+router.get("/user/:id", async (req, res) => {
+  const { id } = req.params;
+
+  await User.findOne({ _id: id })
+    .then(async (user) => {
+      return res.status(200).json(user);
+    })
+    .catch((error) => {
+      return res.status(500).json({ message: "Internal Server Error" });
+    });
+});
+
 // login
 router.post("/", async (req, res) => {
   const { email, password } = req.body;
