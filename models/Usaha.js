@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Schema;
 
 const usahaSchema = new mongoose.Schema({
   namaProduk: {
@@ -23,7 +24,6 @@ const usahaSchema = new mongoose.Schema({
   },
   danaDidapat: {
     type: String,
-    required: true,
   },
   minimalPembelian: {
     type: String,
