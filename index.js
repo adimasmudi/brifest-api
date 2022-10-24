@@ -5,11 +5,14 @@ const methodOverride = require("method-override");
 const session = require("express-session");
 const cors = require("cors");
 
+// rerquire the dotenv
+require("dotenv").config({ path: __dirname + "/.env" });
+
 // mongoose
 const mongoose = require("mongoose");
 
 // connect to mongoose
-mongoose.connect("mongodb://localhost:27017/brifest", {
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
 });
 
@@ -41,8 +44,8 @@ app.use(
 );
 
 // json parser
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: false }));
 app.use(cookieParser());
 
 // routes

@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const Usaha = require("../models/Usaha");
+const { uploadFile } = require("../middlewares/multer");
 
 // get all UMKM
 router.get("/all", async (req, res) => {
@@ -24,7 +25,7 @@ router.get("/usaha/:id", async (req, res) => {
 });
 
 // add Usaha
-router.post("/addUsaha", async (req, res) => {
+router.post("/addUsaha", uploadFile, async (req, res) => {
   const {
     namaProduk,
     namaPerusahaan,
@@ -33,8 +34,6 @@ router.post("/addUsaha", async (req, res) => {
     kebutuhanDana,
     minimalPembelian,
     persentaseSaham,
-    prospektus,
-    gambar,
     lokasi,
     mediaSosial,
   } = req.body;
@@ -47,8 +46,8 @@ router.post("/addUsaha", async (req, res) => {
     kebutuhanDana,
     minimalPembelian,
     persentaseSaham,
-    prospektus,
-    gambar,
+    prospektus: `prospektus/${req.files.prospektus[0].filename}`,
+    gambar: `gambar/${req.files.gambar[0].filename}`,
     lokasi,
     mediaSosial,
   })
