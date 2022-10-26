@@ -1,8 +1,10 @@
 const router = require("express").Router();
-const Usaha = require("../models/Usaha");
 
 // import User model
 const User = require("../models/User");
+const Usaha = require("../models/Usaha");
+const PenerimaPerjanjian = require("../models/PenerimaPerjanjian");
+
 const { uploadFile } = require("../middlewares/multer");
 
 // get all UMKM
@@ -89,8 +91,28 @@ router.delete("/deleteUsaha/:id", async (req, res) => {
 });
 
 // penerimaan UMKM
-router.post("/addPenerimaPerjanjian", async (req, res) => {
-  return;
+
+router.get("/viewPenerimaPerjanjian", async (req, res) => {
+  const pengajuanPerjanjian = await pengajuanPerjanjian.findOne({
+    userId: userId,
+  }); // belum boy
+});
+
+router.post("/addPenerimaPerjanjian", uploadFile, async (req, res) => {
+  const { status, pengajuId, userId } = req.body;
+
+  await PenerimaPerjanjian.create({
+    pengajuId,
+    userId,
+    status,
+    TTD: `TTD/${req.files.TTD[0].filename}`,
+  })
+    .then((penerima) => {
+      return res.status(200).json(penerima);
+    })
+    .catch((err) => {
+      return res.status(500).json({ message: "Internal Server Error" });
+    });
 });
 
 // Rekapan dana

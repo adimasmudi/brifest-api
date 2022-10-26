@@ -6,6 +6,10 @@ const penerimaPerjanjianSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  status: {
+    type: String,
+    required: true,
+  },
   pengajuId: {
     type: ObjectId,
     ref: "PengajuanPerjanjian",
