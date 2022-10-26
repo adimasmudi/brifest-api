@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Schema;
 
 const portofolioSchema = new mongoose.Schema({
   totalPendanaan: {

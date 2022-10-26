@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Schema;
 
 const penerimaPerjanjianSchema = new mongoose.Schema({
   TTD: {

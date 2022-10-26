@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Schema;
 
 const rekapanUsahaSchema = new mongoose.Schema({
   judul: {

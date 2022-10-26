@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Schema;
 
 const dividenSchema = new mongoose.Schema({
   tanggal: {

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Schema;
 
 const pengajuanPerjanjianSchema = new mongoose.Schema({
   TTD: {
@@ -16,6 +17,10 @@ const pengajuanPerjanjianSchema = new mongoose.Schema({
   userId: {
     type: ObjectId,
     ref: "User",
+  },
+  usahaId: {
+    type: ObjectId,
+    ref: "Usaha",
   },
 });
 

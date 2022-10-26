@@ -88,4 +88,13 @@ router.delete("/deleteUsaha/:id", async (req, res) => {
     });
 });
 
+// penerimaan UMKM
+router.post("/addPenerimaPerjanjian", async (req, res) => {
+  return;
+});
+
+// Rekapan dana
+
+// pemberian deviden
+
 module.exports = router;

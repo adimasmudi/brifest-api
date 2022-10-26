@@ -5,6 +5,7 @@ const Pendanaan = require("../models/Pendanaan");
 const Usaha = require("../models/Usaha");
 const User = require("../models/User");
 const Pembayaran = require("../models/Pembayaran");
+const PengajuanPerjanjian = require("../models/PengajuanPerjanjian");
 
 // upload file middleware
 const { uploadFile } = require("../middlewares/multer");
@@ -35,6 +36,49 @@ router.post("/addPendanaan", async (req, res) => {
   await usaha.save();
 });
 
+// Penawaran awal : Perjanjian
+router.get("/viewFormPerjanjian/:idUsaha", async (req, res) => {
+  const user = await User.findOne({ email: "adi@gmail.com" }).then((user) => {
+    return user;
+  });
+
+  const usaha = await Usaha.findOne({ _id: req.params.idUsaha })
+    .populate({
+      path: "userId",
+      select: "id namaUser email",
+    })
+    .then(async (usaha) => {
+      const pendanaan = await Pendanaan.findOne({
+        userId: user._id,
+        usahaId: usaha._id,
+      });
+
+      return res.status(200).json({
+        namaInvestor: user.namaUser,
+        usaha: usaha,
+        pendanaan: pendanaan,
+      });
+    });
+});
+
+router.post("/addPerjanjianInvestor", uploadFile, async (req, res) => {
+  const { userId, usahaId, jumlahLembarSaham, kalimatPerjanjian } = req.body;
+
+  await PengajuanPerjanjian.create({
+    kalimatPerjanjian,
+    jumlahLembarSaham,
+    userId,
+    usahaId,
+    TTD: `TTD/${req.files.TTD[0].filename}`,
+  })
+    .then((pengajuan) => {
+      return res.status(200).json(pengajuan);
+    })
+    .catch((err) => {
+      return res.status(500).json({ message: "Internal Server Error" });
+    });
+});
+
 // view pembayaran
 router.get("/viewFormBayar/:idUsaha", async (req, res) => {
   const user = await User.findOne({ email: "adi@gmail.com" }).then((user) => {
@@ -46,8 +90,8 @@ router.get("/viewFormBayar/:idUsaha", async (req, res) => {
       path: "userId",
       select: "id namaUser email",
     })
-    .then((usaha) => {
-      const pendanaan = Pendanaan.findOne({
+    .then(async (usaha) => {
+      const pendanaan = await Pendanaan.findOne({
         userId: user._id,
         usahaId: usaha._id,
       });

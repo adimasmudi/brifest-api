@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Schema;
 
 const ratingSchema = new mongoose.Schema({
   bintang: {

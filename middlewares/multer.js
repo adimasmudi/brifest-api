@@ -23,11 +23,13 @@ const uploadFile = multer({
     if (file.fieldname === "gambar") checkImageType(file, cb);
     if (file.fieldname === "prospektus") checkFileType(file, cb);
     if (file.fieldname === "buktiBayar") checkImageType(file, cb);
+    if (file.fieldname === "TTD") checkImageType(file, cb);
   },
 }).fields([
   { name: "gambar", maxCount: 12 },
   { name: "prospektus", maxCount: 1 },
   { name: "buktiBayar", maxCount: 1 },
+  { name: "TTD", maxCount: 1 },
 ]);
 
 // // Check file Type
