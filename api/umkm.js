@@ -1,5 +1,8 @@
 const router = require("express").Router();
 const Usaha = require("../models/Usaha");
+
+// import User model
+const User = require("../models/User");
 const { uploadFile } = require("../middlewares/multer");
 
 // get all UMKM
@@ -36,9 +39,10 @@ router.post("/addUsaha", uploadFile, async (req, res) => {
     persentaseSaham,
     lokasi,
     mediaSosial,
+    userId,
   } = req.body;
 
-  await Usaha.create({
+  const usaha = await Usaha.create({
     namaProduk,
     namaPerusahaan,
     kategori,
@@ -50,13 +54,14 @@ router.post("/addUsaha", uploadFile, async (req, res) => {
     gambar: `gambar/${req.files.gambar[0].filename}`,
     lokasi,
     mediaSosial,
-  })
-    .then((usaha) => {
-      return res.status(200).json(usaha);
-    })
-    .catch((error) => {
-      return res.status(500).json({ message: "Internal Server Error" });
-    });
+    userId,
+  }).catch((error) => {
+    return res.status(500).json({ message: "Internal Server Error" });
+  });
+
+  const user = await User.findOne({ _id: userId });
+  user.usahaId.push({ _id: usaha._id });
+  await user.save();
 });
 
 //update UMKM

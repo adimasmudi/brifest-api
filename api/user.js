@@ -30,10 +30,15 @@ router.post("/", async (req, res) => {
         .then((truePassword) => {
           if (!truePassword)
             return res.status(500).json({ message: "Invalid Password" });
+          req.session.user = {
+            id: selectedUser.id,
+            email: selectedUser.email,
+          };
 
           res.status(200).json({
             message: "Login successfull",
             email: selectedUser.email,
+            session: req.session.user,
           });
         })
         .catch((error) => {

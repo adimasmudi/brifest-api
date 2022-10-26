@@ -57,10 +57,12 @@ const usahaSchema = new mongoose.Schema({
     type: ObjectId,
     ref: "User",
   },
-  ratingId: {
-    type: ObjectId,
-    ref: "Rating",
-  },
+  pendanaanId: [
+    {
+      type: ObjectId,
+      ref: "Pendanaan",
+    },
+  ],
 });
 
 module.exports = mongoose.model("Usaha", usahaSchema);

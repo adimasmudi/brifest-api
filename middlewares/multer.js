@@ -22,10 +22,12 @@ const uploadFile = multer({
   fileFilter: function (req, file, cb) {
     if (file.fieldname === "gambar") checkImageType(file, cb);
     if (file.fieldname === "prospektus") checkFileType(file, cb);
+    if (file.fieldname === "buktiBayar") checkImageType(file, cb);
   },
 }).fields([
   { name: "gambar", maxCount: 12 },
   { name: "prospektus", maxCount: 1 },
+  { name: "buktiBayar", maxCount: 1 },
 ]);
 
 // // Check file Type

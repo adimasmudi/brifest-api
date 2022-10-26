@@ -52,6 +52,18 @@ const userSchema = new mongoose.Schema({
     type: ObjectId,
     ref: "Rekening",
   },
+  usahaId: [
+    {
+      type: ObjectId,
+      ref: "Usaha",
+    },
+  ],
+  pendanaanId: [
+    {
+      type: ObjectId,
+      ref: "Pendanaan",
+    },
+  ],
 });
 
 module.exports = mongoose.model("User", userSchema);
