@@ -16,7 +16,7 @@ router.get("/dashboard", async (req, res) => {
 });
 
 // pemberian pendanaan
-router.post("/addPendanaan", async (req, res) => {
+router.post("/addPendanaan", auth, async (req, res) => {
   const { nominal, userId, usahaId } = req.body;
 
   const pendanaan = await Pendanaan.create({
@@ -37,7 +37,7 @@ router.post("/addPendanaan", async (req, res) => {
 });
 
 // Penawaran awal : Perjanjian
-router.get("/viewFormPerjanjian/:idUsaha", async (req, res) => {
+router.get("/viewFormPerjanjian/:idUsaha", auth, async (req, res) => {
   const user = await User.findOne({ email: "adi@gmail.com" }).then((user) => {
     return user;
   });
@@ -61,7 +61,7 @@ router.get("/viewFormPerjanjian/:idUsaha", async (req, res) => {
     });
 });
 
-router.post("/addPerjanjianInvestor", uploadFile, async (req, res) => {
+router.post("/addPerjanjianInvestor", auth, uploadFile, async (req, res) => {
   const { userId, usahaId, jumlahLembarSaham, kalimatPerjanjian } = req.body;
 
   await PengajuanPerjanjian.create({
@@ -80,7 +80,7 @@ router.post("/addPerjanjianInvestor", uploadFile, async (req, res) => {
 });
 
 // view pembayaran
-router.get("/viewFormBayar/:idUsaha", async (req, res) => {
+router.get("/viewFormBayar/:idUsaha", auth, async (req, res) => {
   const user = await User.findOne({ email: "adi@gmail.com" }).then((user) => {
     return user;
   });
@@ -104,7 +104,7 @@ router.get("/viewFormBayar/:idUsaha", async (req, res) => {
 });
 
 // pembayaran
-router.post("/bayar", uploadFile, async (req, res) => {
+router.post("/bayar", auth, uploadFile, async (req, res) => {
   const { jumlahLembarSaham, pendanaanId } = req.body;
 
   const tanggal = new Date();

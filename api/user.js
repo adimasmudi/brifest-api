@@ -1,4 +1,8 @@
 const router = require("express").Router();
+const jwt = require("jsonwebtoken");
+
+// middlewares
+const auth = require("../middlewares/auth");
 
 // import User model
 const User = require("../models/User");
@@ -30,15 +34,19 @@ router.post("/", async (req, res) => {
         .then((truePassword) => {
           if (!truePassword)
             return res.status(500).json({ message: "Invalid Password" });
-          req.session.user = {
-            id: selectedUser.id,
-            email: selectedUser.email,
-          };
+          // create a JWT Token
+          const token = jwt.sign(
+            {
+              userId: selectedUser._id,
+              userEmail: selectedUser.email,
+            },
+            "RANDOM-TOKEN",
+            { expiresIn: "24h" }
+          );
 
           res.status(200).json({
             message: "Login successfull",
-            email: selectedUser.email,
-            session: req.session.user,
+            token,
           });
         })
         .catch((error) => {

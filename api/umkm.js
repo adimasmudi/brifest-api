@@ -8,10 +8,12 @@ const Pendanaan = require("../models/Pendanaan");
 const Dividen = require("../models/Dividen");
 const RekapanUsaha = require("../models/RekapanUsaha");
 
+// middlewares
+const auth = require("../middlewares/auth");
 const { uploadFile } = require("../middlewares/multer");
 
 // get all UMKM
-router.get("/all", async (req, res) => {
+router.get("/all", auth, async (req, res) => {
   await Usaha.find({})
     .then((data) => {
       return res.status(200).json(data);
@@ -22,7 +24,7 @@ router.get("/all", async (req, res) => {
 });
 
 // UMKM detail based on id
-router.get("/usaha/:id", async (req, res) => {
+router.get("/usaha/:id", auth, async (req, res) => {
   await Usaha.findOne({ _id: req.params.id })
     .then((data) => {
       return res.status(200).json(data);
@@ -33,7 +35,7 @@ router.get("/usaha/:id", async (req, res) => {
 });
 
 // add Usaha
-router.post("/addUsaha", uploadFile, async (req, res) => {
+router.post("/addUsaha", auth, uploadFile, async (req, res) => {
   const {
     namaProduk,
     namaPerusahaan,
@@ -44,7 +46,6 @@ router.post("/addUsaha", uploadFile, async (req, res) => {
     persentaseSaham,
     lokasi,
     mediaSosial,
-    userId,
   } = req.body;
 
   const usaha = await Usaha.create({
@@ -59,18 +60,18 @@ router.post("/addUsaha", uploadFile, async (req, res) => {
     gambar: `gambar/${req.files.gambar[0].filename}`,
     lokasi,
     mediaSosial,
-    userId,
+    userId: req.user.userId,
   }).catch((error) => {
     return res.status(500).json({ message: "Internal Server Error" });
   });
 
-  const user = await User.findOne({ _id: userId });
+  const user = await User.findOne({ _id: req.user.userId });
   user.usahaId.push({ _id: usaha._id });
   await user.save();
 });
 
 //update UMKM
-router.patch("/updateUsaha/:id", async (req, res) => {
+router.patch("/updateUsaha/:id", auth, async (req, res) => {
   await Usaha.findByIdAndUpdate(req.params.id, req.body, {
     returnOriginal: false,
   })
@@ -83,7 +84,7 @@ router.patch("/updateUsaha/:id", async (req, res) => {
 });
 
 // delete UMKM
-router.delete("/deleteUsaha/:id", async (req, res) => {
+router.delete("/deleteUsaha/:id", auth, async (req, res) => {
   await Usaha.findByIdAndDelete(req.params.id)
     .then((data) => {
       return res.status(200).json({ message: "delete successfull" });
@@ -95,13 +96,13 @@ router.delete("/deleteUsaha/:id", async (req, res) => {
 
 // penerimaan UMKM
 
-router.get("/viewPenerimaPerjanjian", async (req, res) => {
+router.get("/viewPenerimaPerjanjian", auth, async (req, res) => {
   const pengajuanPerjanjian = await pengajuanPerjanjian.findOne({
     userId: userId,
   }); // belum boy
 });
 
-router.post("/addPenerimaPerjanjian", uploadFile, async (req, res) => {
+router.post("/addPenerimaPerjanjian", auth, uploadFile, async (req, res) => {
   const { status, pengajuId, userId } = req.body;
 
   await PenerimaPerjanjian.create({
@@ -119,7 +120,7 @@ router.post("/addPenerimaPerjanjian", uploadFile, async (req, res) => {
 });
 
 // portofolio usaha
-router.get("/portofolioUsaha/:idUsaha", async (req, res) => {
+router.get("/portofolioUsaha/:idUsaha", auth, async (req, res) => {
   const idUsaha = req.params.idUsaha;
 
   // belum
@@ -127,7 +128,7 @@ router.get("/portofolioUsaha/:idUsaha", async (req, res) => {
 
 // //////////////////////// Rekapan Dana ////////////////////////
 // add Rekapan dana
-router.post("/addRekapanDana", async (req, res) => {
+router.post("/addRekapanDana", auth, async (req, res) => {
   const { judul, tipe, jumlah, catatan, usahaId } = req.body;
 
   const tanggal = new Date();
@@ -149,7 +150,7 @@ router.post("/addRekapanDana", async (req, res) => {
 });
 
 // get update form
-router.get("/viewUpdateRekapanDana", async (req, res) => {
+router.get("/viewUpdateRekapanDana", auth, async (req, res) => {
   const rekapanId = "635a4186369c4bb4bf7b5433"; // sementara
   const rekapanLama = await RekapanUsaha.findById(rekapanId)
     .then((data) => {
@@ -161,7 +162,7 @@ router.get("/viewUpdateRekapanDana", async (req, res) => {
 });
 
 // update rekapan dana
-router.patch("/updateRekapan", async (req, res) => {
+router.patch("/updateRekapan", auth, async (req, res) => {
   const rekapanId = "635a4186369c4bb4bf7b5433"; // sementara
   await RekapanUsaha.findByIdAndUpdate(
     rekapanId,
@@ -179,7 +180,7 @@ router.patch("/updateRekapan", async (req, res) => {
 });
 
 // deleteRekapan
-router.delete("/deleteRekapan", async (req, res) => {
+router.delete("/deleteRekapan", auth, async (req, res) => {
   const rekapanId = "635a4186369c4bb4bf7b5433"; // sementara
   await RekapanUsaha.findByIdAndDelete(rekapanId)
     .then((_) => {
@@ -191,7 +192,7 @@ router.delete("/deleteRekapan", async (req, res) => {
 });
 
 // view list investor
-router.get("/viewListInvestor/:idUsaha", async (req, res) => {
+router.get("/viewListInvestor/:idUsaha", auth, async (req, res) => {
   const idUsaha = req.params.idUsaha;
 
   const pendanaan = await Pendanaan.find({ usahaId: idUsaha })
@@ -203,7 +204,7 @@ router.get("/viewListInvestor/:idUsaha", async (req, res) => {
 });
 
 // pemberian deviden
-router.post("/transferDividen", uploadFile, async (req, res) => {
+router.post("/transferDividen", auth, uploadFile, async (req, res) => {
   const { usahaId, userId, nominal, jumlahLembarSaham } = req.body;
 
   const tanggal = new Date();
