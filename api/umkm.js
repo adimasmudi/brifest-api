@@ -4,6 +4,8 @@ const router = require("express").Router();
 const User = require("../models/User");
 const Usaha = require("../models/Usaha");
 const PenerimaPerjanjian = require("../models/PenerimaPerjanjian");
+const Pendanaan = require("../models/Pendanaan");
+const Dividen = require("../models/Dividen");
 
 const { uploadFile } = require("../middlewares/multer");
 
@@ -117,6 +119,38 @@ router.post("/addPenerimaPerjanjian", uploadFile, async (req, res) => {
 
 // Rekapan dana
 
+// view list investor
+router.get("/viewListInvestor/:idUsaha", async (req, res) => {
+  const idUsaha = req.params.idUsaha;
+
+  const pendanaan = await Pendanaan.find({ usahaId: idUsaha })
+    .populate("usahaId")
+    .populate("userId")
+    .then((data) => {
+      res.status(200).json(data);
+    });
+});
+
 // pemberian deviden
+router.post("/transferDividen", uploadFile, async (req, res) => {
+  const { usahaId, userId, nominal, jumlahLembarSaham } = req.body;
+
+  const tanggal = new Date();
+
+  await Dividen.create({
+    usahaId,
+    userId,
+    nominal,
+    tanggal,
+    jumlahLembarSaham,
+    buktiTransfer: `buktiTransfer/${req.files.buktiTransfer[0].filename}`,
+  })
+    .then((data) => {
+      return res.status(200).json(data);
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: "Internal Server Error" });
+    });
+});
 
 module.exports = router;

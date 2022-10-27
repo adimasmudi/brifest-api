@@ -14,6 +14,10 @@ const dividenSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  buktiTransfer: {
+    type: String,
+    required: true,
+  },
   userId: {
     type: ObjectId,
     ref: "User",
