@@ -14,7 +14,7 @@ const rekapanUsahaSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  jenis: {
+  tipe: {
     type: String,
     required: true,
   },

@@ -6,6 +6,7 @@ const Usaha = require("../models/Usaha");
 const PenerimaPerjanjian = require("../models/PenerimaPerjanjian");
 const Pendanaan = require("../models/Pendanaan");
 const Dividen = require("../models/Dividen");
+const RekapanUsaha = require("../models/RekapanUsaha");
 
 const { uploadFile } = require("../middlewares/multer");
 
@@ -117,7 +118,77 @@ router.post("/addPenerimaPerjanjian", uploadFile, async (req, res) => {
     });
 });
 
-// Rekapan dana
+// portofolio usaha
+router.get("/portofolioUsaha/:idUsaha", async (req, res) => {
+  const idUsaha = req.params.idUsaha;
+
+  // belum
+});
+
+// //////////////////////// Rekapan Dana ////////////////////////
+// add Rekapan dana
+router.post("/addRekapanDana", async (req, res) => {
+  const { judul, tipe, jumlah, catatan, usahaId } = req.body;
+
+  const tanggal = new Date();
+
+  await RekapanUsaha.create({
+    tanggal, // sementara
+    judul,
+    tipe,
+    jumlah,
+    catatan,
+    usahaId,
+  })
+    .then((data) => {
+      return res.status(200).json(data);
+    })
+    .catch((err) => {
+      return res.status(500).json({ message: "Internal Server Error" });
+    });
+});
+
+// get update form
+router.get("/viewUpdateRekapanDana", async (req, res) => {
+  const rekapanId = "635a4186369c4bb4bf7b5433"; // sementara
+  const rekapanLama = await RekapanUsaha.findById(rekapanId)
+    .then((data) => {
+      res.status(200).json(data);
+    })
+    .catch((err) => {
+      return res.status(500).json({ message: "Internal Server Error" });
+    });
+});
+
+// update rekapan dana
+router.patch("/updateRekapan", async (req, res) => {
+  const rekapanId = "635a4186369c4bb4bf7b5433"; // sementara
+  await RekapanUsaha.findByIdAndUpdate(
+    rekapanId,
+    { ...req.body, tanggal: new Date() },
+    {
+      returnOriginal: false,
+    }
+  )
+    .then((result) => {
+      return res.status(200).json(result);
+    })
+    .catch((error) => {
+      return res.status(500).json({ message: "Internal Server Error" });
+    });
+});
+
+// deleteRekapan
+router.delete("/deleteRekapan", async (req, res) => {
+  const rekapanId = "635a4186369c4bb4bf7b5433"; // sementara
+  await RekapanUsaha.findByIdAndDelete(rekapanId)
+    .then((_) => {
+      return res.status(200).json({ message: "Delete data successfully" });
+    })
+    .catch((err) => {
+      return res.status(500).json({ message: "Internal Server Error" });
+    });
+});
 
 // view list investor
 router.get("/viewListInvestor/:idUsaha", async (req, res) => {
