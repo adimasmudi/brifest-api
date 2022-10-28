@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const ObjectId = require("mongodb").ObjectID;
 
 // import User model
 const User = require("../models/User");
@@ -12,6 +13,11 @@ const RekapanUsaha = require("../models/RekapanUsaha");
 const auth = require("../middlewares/auth");
 const { uploadFile } = require("../middlewares/multer");
 
+// UMKM dashboard
+router.get("/dashboard", async (req, res) => {
+  return res.status(200).json({ m: "hallo" });
+});
+
 // get all UMKM
 router.get("/all", auth, async (req, res) => {
   await Usaha.find({})
@@ -23,11 +29,26 @@ router.get("/all", auth, async (req, res) => {
     });
 });
 
+// UMKM milik user tertentu
+router.get("/usahaUser", auth, async (req, res) => {
+  const idUser = req.user.userId;
+
+  const usaha = await Usaha.find({ userId: idUser })
+    .then((data) => {
+      return res.status(200).json(data);
+    })
+    .catch((err) => {
+      return res.status(500).json({ message: err });
+    });
+});
+
 // UMKM detail based on id
 router.get("/usaha/:id", auth, async (req, res) => {
   await Usaha.findOne({ _id: req.params.id })
-    .then((data) => {
-      return res.status(200).json(data);
+    .then(async (data) => {
+      await RekapanUsaha.find({ usahaId: data._id }).then((rekapan) => {
+        return res.status(200).json({ usaha: data, rekapan: rekapan });
+      });
     })
     .catch((err) => {
       return res.status(500).json({ message: "Internal Server Error" });
@@ -36,6 +57,7 @@ router.get("/usaha/:id", auth, async (req, res) => {
 
 // add Usaha
 router.post("/addUsaha", auth, uploadFile, async (req, res) => {
+  console.log("body", req.body);
   const {
     namaProduk,
     namaPerusahaan,
@@ -46,7 +68,11 @@ router.post("/addUsaha", auth, uploadFile, async (req, res) => {
     persentaseSaham,
     lokasi,
     mediaSosial,
+    images,
   } = req.body;
+
+  // console.log(req.files);
+  // console.log(req.user);
 
   const usaha = await Usaha.create({
     namaProduk,
@@ -56,18 +82,18 @@ router.post("/addUsaha", auth, uploadFile, async (req, res) => {
     kebutuhanDana,
     minimalPembelian,
     persentaseSaham,
-    prospektus: `prospektus/${req.files.prospektus[0].filename}`,
-    gambar: `gambar/${req.files.gambar[0].filename}`,
+    // prospektus: `prospektus/${req.files.prospektus[0].filename}`,
+    images: `images/${req.files.images[0].filename}`,
     lokasi,
     mediaSosial,
     userId: req.user.userId,
-  }).catch((error) => {
-    return res.status(500).json({ message: "Internal Server Error" });
-  });
-
-  const user = await User.findOne({ _id: req.user.userId });
-  user.usahaId.push({ _id: usaha._id });
-  await user.save();
+  })
+    .then((data) => {
+      res.redirect("/umkm/dashboard");
+    })
+    .catch((error) => {
+      return res.status(500).json({ message: error });
+    });
 });
 
 //update UMKM
@@ -129,9 +155,7 @@ router.get("/portofolioUsaha/:idUsaha", auth, async (req, res) => {
 // //////////////////////// Rekapan Dana ////////////////////////
 // add Rekapan dana
 router.post("/addRekapanDana", auth, async (req, res) => {
-  const { judul, tipe, jumlah, catatan, usahaId } = req.body;
-
-  const tanggal = new Date();
+  const { tanggal, judul, tipe, jumlah, catatan, usahaId } = req.body;
 
   await RekapanUsaha.create({
     tanggal, // sementara

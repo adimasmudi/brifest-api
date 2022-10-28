@@ -19,14 +19,14 @@ const usahaSchema = new mongoose.Schema({
     required: true,
   },
   kebutuhanDana: {
-    type: String,
+    type: Number,
     required: true,
   },
   danaDidapat: {
-    type: String,
+    type: Number,
   },
   minimalPembelian: {
-    type: String,
+    type: Number,
     required: true,
   },
   persentaseSaham: {
@@ -35,22 +35,20 @@ const usahaSchema = new mongoose.Schema({
   },
   prospektus: {
     type: String,
-    required: true,
   },
-  gambar: {
+  images: {
     type: String,
-    required: true,
   },
   lokasi: {
     type: String,
     required: true,
   },
   lokasi: {
-    type: [String],
+    type: String,
     required: true,
   },
   mediaSosial: {
-    type: [String],
+    type: String,
     required: true,
   },
   userId: {

@@ -8,11 +8,36 @@ const Pembayaran = require("../models/Pembayaran");
 const PengajuanPerjanjian = require("../models/PengajuanPerjanjian");
 
 // upload file middleware
+// middlewares
+const auth = require("../middlewares/auth");
 const { uploadFile } = require("../middlewares/multer");
 
 // get dashboard data
-router.get("/dashboard", async (req, res) => {
-  return;
+router.get("/dashboard", auth, async (req, res) => {
+  const pendanaan = await Pendanaan.find({ userId: req.user.userId });
+  let dana = [];
+  if (!pendanaan) dana = [];
+
+  const allUsaha = await Usaha.find({})
+    .populate("userId")
+    .populate("pendanaanId");
+
+  return res.status(200).json({
+    user: req.user,
+    dana: dana,
+    usaha: allUsaha,
+  });
+});
+
+// get detail usaha
+router.get("/detailUsaha/:id", auth, async (req, res) => {
+  const usaha = await Usaha.findById(req.params.id)
+    .then((data) => {
+      return res.status(200).json(data);
+    })
+    .catch((err) => {
+      return res.status(500).json({ message: err });
+    });
 });
 
 // pemberian pendanaan
@@ -38,7 +63,7 @@ router.post("/addPendanaan", auth, async (req, res) => {
 
 // Penawaran awal : Perjanjian
 router.get("/viewFormPerjanjian/:idUsaha", auth, async (req, res) => {
-  const user = await User.findOne({ email: "adi@gmail.com" }).then((user) => {
+  const user = await User.findOne({ _id: req.user.userId }).then((user) => {
     return user;
   });
 
@@ -62,14 +87,14 @@ router.get("/viewFormPerjanjian/:idUsaha", auth, async (req, res) => {
 });
 
 router.post("/addPerjanjianInvestor", auth, uploadFile, async (req, res) => {
-  const { userId, usahaId, jumlahLembarSaham, kalimatPerjanjian } = req.body;
+  const { usahaId, jumlahLembarSaham, kalimatPerjanjian, images } = req.body;
 
   await PengajuanPerjanjian.create({
     kalimatPerjanjian,
     jumlahLembarSaham,
-    userId,
+    userId: req.user.userId,
     usahaId,
-    TTD: `TTD/${req.files.TTD[0].filename}`,
+    images: `images/${req.files.images[0].filename}`,
   })
     .then((pengajuan) => {
       return res.status(200).json(pengajuan);
@@ -81,7 +106,7 @@ router.post("/addPerjanjianInvestor", auth, uploadFile, async (req, res) => {
 
 // view pembayaran
 router.get("/viewFormBayar/:idUsaha", auth, async (req, res) => {
-  const user = await User.findOne({ email: "adi@gmail.com" }).then((user) => {
+  const user = await User.findOne({ _id: req.user.userId }).then((user) => {
     return user;
   });
 

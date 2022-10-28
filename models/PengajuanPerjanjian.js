@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Schema;
 
 const pengajuanPerjanjianSchema = new mongoose.Schema({
-  TTD: {
+  images: {
     type: String,
     required: true,
   },

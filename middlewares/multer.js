@@ -5,7 +5,7 @@ const fs = require("fs");
 
 const storageFile = multer.diskStorage({
   destination: function (req, file, cb) {
-    var dir = `public/${file.fieldname}`;
+    var dir = `public/images`;
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir);
     }
@@ -20,17 +20,17 @@ const uploadFile = multer({
   storage: storageFile,
   limits: { fileSize: 1000000 },
   fileFilter: function (req, file, cb) {
-    if (file.fieldname === "gambar") checkImageType(file, cb);
-    if (file.fieldname === "prospektus") checkFileType(file, cb);
-    if (file.fieldname === "buktiBayar") checkImageType(file, cb);
-    if (file.fieldname === "TTD") checkImageType(file, cb);
-    if (file.fieldname === "buktiTransfer") checkImageType(file, cb);
+    checkImageType(file, cb);
+    // if (file.fieldname === "images") checkImageType(file, cb);
+    // if (file.fieldname === "prospektus") checkFileType(file, cb);
+    // if (file.fieldname === "buktiBayar") checkImageType(file, cb);
+    // if (file.fieldname === "TTD") checkImageType(file, cb);
+    // if (file.fieldname === "buktiTransfer") checkImageType(file, cb);
   },
 }).fields([
-  { name: "gambar", maxCount: 12 },
+  { name: "images", maxCount: 1 },
   { name: "prospektus", maxCount: 1 },
   { name: "buktiBayar", maxCount: 1 },
-  { name: "TTD", maxCount: 1 },
   { name: "buktiTransfer", maxCount: 1 },
 ]);
 

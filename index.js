@@ -4,6 +4,9 @@ var cookieParser = require("cookie-parser");
 const methodOverride = require("method-override");
 const session = require("express-session");
 const cors = require("cors");
+const path = require("path");
+
+const bodyParser = require("body-parser");
 
 // rerquire the dotenv
 require("dotenv").config({ path: __dirname + "/.env" });
@@ -44,9 +47,13 @@ app.use(
 );
 
 // json parser
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb", extended: false }));
+app.use(express.json({ limit: "100mb" }));
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.urlencoded({ limit: "100mb", extended: false }));
+
 app.use(cookieParser());
+app.use("/public", express.static("public"));
 
 // routes
 app.use("/", userController);

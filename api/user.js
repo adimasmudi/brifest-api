@@ -39,6 +39,7 @@ router.post("/", async (req, res) => {
             {
               userId: selectedUser._id,
               userEmail: selectedUser.email,
+              userRole: selectedUser.role,
             },
             "RANDOM-TOKEN",
             { expiresIn: "24h" }
@@ -46,6 +47,9 @@ router.post("/", async (req, res) => {
 
           res.status(200).json({
             message: "Login successfull",
+            userId: selectedUser._id,
+            userEmail: selectedUser.email,
+            userRole: selectedUser.role,
             token,
           });
         })
