@@ -249,4 +249,33 @@ router.post("/transferDividen", auth, uploadFile, async (req, res) => {
     });
 });
 
+// view list transaksi
+router.get("/allTransaksi", auth, async (req, res) => {
+  const usaha = await Usaha.find({ userId: req.user.userId })
+    .populate("pendanaanId")
+    .then((dataUsaha) => {
+      let dataBayar = [];
+      if (dataUsaha?.pendanaanId?.length > 0) {
+        dataUsaha.pendanaanId.map((dataDana) => {
+          Pembayaran.find({ pendanaanId: dataDana._id })
+            .then((dt) => {
+              dataBayar.push(dt);
+            })
+            .catch((err) => {
+              return res
+                .status(500)
+                .json({ message: "Tidak bisa mendapatkan pembayaran" });
+            });
+        });
+      }
+
+      return res
+        .status(200)
+        .json({ dataUsaha: dataUsaha, dataBayar: dataBayar });
+    })
+    .catch((error) => {
+      return res.status(500).json({ message: error });
+    });
+});
+
 module.exports = router;
