@@ -15,9 +15,12 @@ require("dotenv").config({ path: __dirname + "/.env" });
 const mongoose = require("mongoose");
 
 // connect to mongoose
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-});
+mongoose.connect(
+  "mongodb+srv://brifest:brifest@cluster0.hoyf0.mongodb.net/brifest?retryWrites=true&w=majority",
+  {
+    useNewUrlParser: true,
+  }
+);
 
 // import router
 const investorRouter = require("./api/investor");
