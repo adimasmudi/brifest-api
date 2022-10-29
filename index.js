@@ -64,6 +64,6 @@ app.use("/investor", investorRouter);
 app.use("/umkm", UMKMRouter);
 
 // run app
-app.listen(5000, () => {
+app.listen(process.env.PORT || 5000, () => {
   console.log("listening on port 5000");
 });
