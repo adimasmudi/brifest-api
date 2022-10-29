@@ -264,7 +264,7 @@ router.get("/allTransaksi", auth, async (req, res) => {
             .catch((err) => {
               return res
                 .status(500)
-                .json({ message: "Tidak bisa mendapatkan pembayaran" });
+                .json({ message: "Tidak bisa mendapatkan data pembayaran" });
             });
         });
       }
