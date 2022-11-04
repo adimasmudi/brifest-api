@@ -12,10 +12,21 @@ const RekapanUsaha = require("../models/RekapanUsaha");
 // middlewares
 const auth = require("../middlewares/auth");
 const { uploadFile } = require("../middlewares/multer");
+const PengajuanPerjanjian = require("../models/PengajuanPerjanjian");
 
 // UMKM dashboard
-router.get("/dashboard", async (req, res) => {
-  return res.status(200).json({ m: "hallo" });
+router.get("/dashboard", auth, async (req, res) => {
+  const usaha = await Usaha.find({ userId: req.user.userId })
+    .populate("userId")
+    .populate("pendanaanId")
+    .then(async (dataUsaha) => {
+      const rekapan = await RekapanUsaha.find({ usahaId: dataUsaha[0]._id });
+
+      return res.status(200).json({ usaha: dataUsaha, rekapan: rekapan });
+    })
+    .catch((err) => {
+      return res.status(500).json({ message: err });
+    });
 });
 
 // get all UMKM
@@ -122,9 +133,22 @@ router.delete("/deleteUsaha/:id", auth, async (req, res) => {
 
 // penerimaan UMKM
 
+// for notification
+router.get("/getPengajuanPerjanjian", auth, async (req, res) => {
+  const usaha = await Usaha.find({ userId: req.user.userId }).then((usaha) => {
+    usaha.map(async (us) => {
+      const pengajuan = await PengajuanPerjanjian.find({
+        usahaId: us._id,
+      }).then((data) => {
+        if (data !== []) return data;
+      });
+    });
+  });
+});
+
 router.get("/viewPenerimaPerjanjian", auth, async (req, res) => {
   const pengajuanPerjanjian = await pengajuanPerjanjian.findOne({
-    userId: userId,
+    userId: req.user.userId,
   }); // belum boy
 });
 

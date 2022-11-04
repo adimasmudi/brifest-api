@@ -29,6 +29,20 @@ router.get("/dashboard", auth, async (req, res) => {
   });
 });
 
+router.get("/listUsaha", auth, async (req, res) => {
+  const pendanaan = await Pendanaan.find({ _id: req.user.userId })
+    .populate("userId")
+    .populate("usahaId")
+    .then(async (dana) => {
+      const dataBayar = await Pembayaran.findOne({ pendanaanId: dana._id });
+
+      return res.status(200).json({ pendanaan: dana, pembayaran: dataBayar });
+    })
+    .catch((err) => {
+      return res.status(500).json({ message: "Internal Server Error" });
+    });
+});
+
 // get detail usaha
 router.get("/detailUsaha/:id", auth, async (req, res) => {
   const usaha = await Usaha.findById(req.params.id)
