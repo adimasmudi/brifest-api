@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const ObjectId = require("mongodb").ObjectID;
 
 // import model
 const Pendanaan = require("../models/Pendanaan");
@@ -15,8 +16,6 @@ const { uploadFile } = require("../middlewares/multer");
 // get dashboard data
 router.get("/dashboard", auth, async (req, res) => {
   const pendanaan = await Pendanaan.find({ userId: req.user.userId });
-  let dana = [];
-  if (!pendanaan) dana = [];
 
   const allUsaha = await Usaha.find({})
     .populate("userId")
@@ -24,19 +23,16 @@ router.get("/dashboard", auth, async (req, res) => {
 
   return res.status(200).json({
     user: req.user,
-    dana: dana,
+    dana: pendanaan,
     usaha: allUsaha,
   });
 });
 
 router.get("/listUsaha", auth, async (req, res) => {
-  const pendanaan = await Pendanaan.find({ _id: req.user.userId })
-    .populate("userId")
+  const pendanaan = await Pendanaan.find({ userId: req.user.userId })
     .populate("usahaId")
     .then(async (dana) => {
-      const dataBayar = await Pembayaran.findOne({ pendanaanId: dana._id });
-
-      return res.status(200).json({ pendanaan: dana, pembayaran: dataBayar });
+      return res.status(200).json({ pendanaan: dana });
     })
     .catch((err) => {
       return res.status(500).json({ message: "Internal Server Error" });
@@ -46,6 +42,8 @@ router.get("/listUsaha", auth, async (req, res) => {
 // get detail usaha
 router.get("/detailUsaha/:id", auth, async (req, res) => {
   const usaha = await Usaha.findById(req.params.id)
+    .populate("pendanaanId")
+    .populate("userId")
     .then((data) => {
       return res.status(200).json(data);
     })
@@ -55,24 +53,30 @@ router.get("/detailUsaha/:id", auth, async (req, res) => {
 });
 
 // pemberian pendanaan
-router.post("/addPendanaan", auth, async (req, res) => {
-  const { nominal, userId, usahaId } = req.body;
+router.post("/addPendanaan", auth, uploadFile, async (req, res) => {
+  const { jumlahLembarSaham, nominal, usahaId, images } = req.body;
 
   const pendanaan = await Pendanaan.create({
+    tanggal: new Date(),
+    jumlahLembarSaham,
+    status: "proses",
+    images: `images/${req.files.images[0].filename}`,
     nominal,
-    userId,
+    userId: req.user.userId,
     usahaId,
   }).catch((error) => {
     return res.status(500).json(error);
   });
 
-  const user = await User.findOne({ _id: userId });
+  const user = await User.findOne({ _id: req.user.userId });
   user.pendanaanId.push({ _id: pendanaan._id });
   await user.save();
 
   const usaha = await Usaha.findOne({ _id: usahaId });
   usaha.pendanaanId.push({ _id: pendanaan._id });
   await usaha.save();
+
+  return;
 });
 
 // Penawaran awal : Perjanjian
@@ -130,39 +134,36 @@ router.get("/viewFormBayar/:idUsaha", auth, async (req, res) => {
       select: "id namaUser email",
     })
     .then(async (usaha) => {
-      const pendanaan = await Pendanaan.findOne({
-        userId: user._id,
-        usahaId: usaha._id,
-      });
       return res.status(200).json({
         namaInvestor: user.namaUser,
         usaha: usaha,
-        nominal: pendanaan.nominal,
       });
     });
 });
 
 // pembayaran
-router.post("/bayar", auth, uploadFile, async (req, res) => {
-  const { jumlahLembarSaham, pendanaanId } = req.body;
+// router.post("/bayar", auth, uploadFile, async (req, res) => {
+//   const { jumlahLembarSaham, pendanaanId, images } = req.body;
 
-  const tanggal = new Date();
+//   const tanggal = new Date();
 
-  const status = "proses";
+//   const status = "proses";
 
-  await Pembayaran.create({
-    jumlahLembarSaham,
-    status,
-    tanggal,
-    buktiBayar: `buktiBayar/${req.files.buktiBayar[0].filename}`,
-    pendanaanId: pendanaanId,
-  })
-    .then((pembayaran) => {
-      return res.status(200).json(pembayaran);
-    })
-    .catch((error) => {
-      return res.status(500).json({ message: "Internal Server Error" });
-    });
-});
+//   console.log(req.body);
+
+//   // await Pembayaran.create({
+//   //   jumlahLembarSaham,
+//   //   status,
+//   //   tanggal,
+//   //   images: `images/${req.files.images[0].filename}`,
+//   //   pendanaanId: ObjectId(pendanaanId),
+//   // })
+//   //   .then((pembayaran) => {
+//   //     return res.status(200).json(pembayaran);
+//   //   })
+//   //   .catch((error) => {
+//   //     return res.status(500).json({ message: error });
+//   //   });
+// });
 
 module.exports = router;

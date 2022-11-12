@@ -16,17 +16,20 @@ const PengajuanPerjanjian = require("../models/PengajuanPerjanjian");
 
 // UMKM dashboard
 router.get("/dashboard", auth, async (req, res) => {
-  const usaha = await Usaha.find({ userId: req.user.userId })
-    .populate("userId")
-    .populate("pendanaanId")
-    .then(async (dataUsaha) => {
-      const rekapan = await RekapanUsaha.find({ usahaId: dataUsaha[0]._id });
-
-      return res.status(200).json({ usaha: dataUsaha, rekapan: rekapan });
-    })
-    .catch((err) => {
-      return res.status(500).json({ message: err });
-    });
+  try {
+    const usaha = await Usaha.find({ userId: req.user.userId })
+      .populate("userId")
+      .populate("pendanaanId")
+      .populate("rekapanId")
+      .then(async (dataUsaha) => {
+        return res.status(200).json({ usaha: dataUsaha, user: req.user });
+      })
+      .catch((err) => {
+        return res.status(500).json({ message: err });
+      });
+  } catch (error) {
+    console.log("err");
+  }
 });
 
 // get all UMKM
@@ -56,10 +59,10 @@ router.get("/usahaUser", auth, async (req, res) => {
 // UMKM detail based on id
 router.get("/usaha/:id", auth, async (req, res) => {
   await Usaha.findOne({ _id: req.params.id })
+    .populate("pendanaanId")
+    .populate("rekapanId")
     .then(async (data) => {
-      await RekapanUsaha.find({ usahaId: data._id }).then((rekapan) => {
-        return res.status(200).json({ usaha: data, rekapan: rekapan });
-      });
+      return res.status(200).json({ usaha: data });
     })
     .catch((err) => {
       return res.status(500).json({ message: "Internal Server Error" });
@@ -68,7 +71,7 @@ router.get("/usaha/:id", auth, async (req, res) => {
 
 // add Usaha
 router.post("/addUsaha", auth, uploadFile, async (req, res) => {
-  console.log("body", req.body);
+  // console.log("body", req.body);
   const {
     namaProduk,
     namaPerusahaan,
@@ -181,20 +184,20 @@ router.get("/portofolioUsaha/:idUsaha", auth, async (req, res) => {
 router.post("/addRekapanDana", auth, async (req, res) => {
   const { tanggal, judul, tipe, jumlah, catatan, usahaId } = req.body;
 
-  await RekapanUsaha.create({
+  const rekapan = await RekapanUsaha.create({
     tanggal, // sementara
     judul,
     tipe,
     jumlah,
     catatan,
     usahaId,
-  })
-    .then((data) => {
-      return res.status(200).json(data);
-    })
-    .catch((err) => {
-      return res.status(500).json({ message: "Internal Server Error" });
-    });
+  }).catch((err) => {
+    return res.status(500).json({ message: "Internal Server Error" });
+  });
+
+  const usaha = await Usaha.findOne({ _id: usahaId });
+  usaha.rekapanId.push({ _id: rekapan._id });
+  await usaha.save();
 });
 
 // get update form
@@ -228,8 +231,8 @@ router.patch("/updateRekapan", auth, async (req, res) => {
 });
 
 // deleteRekapan
-router.delete("/deleteRekapan", auth, async (req, res) => {
-  const rekapanId = "635a4186369c4bb4bf7b5433"; // sementara
+router.delete("/deleteRekapan/:id", auth, async (req, res) => {
+  const rekapanId = req.params.id; // sementara
   await RekapanUsaha.findByIdAndDelete(rekapanId)
     .then((_) => {
       return res.status(200).json({ message: "Delete data successfully" });
@@ -277,25 +280,22 @@ router.post("/transferDividen", auth, uploadFile, async (req, res) => {
 router.get("/allTransaksi", auth, async (req, res) => {
   const usaha = await Usaha.find({ userId: req.user.userId })
     .populate("pendanaanId")
+    .populate("userId")
     .then((dataUsaha) => {
-      let dataBayar = [];
-      if (dataUsaha?.pendanaanId?.length > 0) {
-        dataUsaha.pendanaanId.map((dataDana) => {
-          Pembayaran.find({ pendanaanId: dataDana._id })
-            .then((dt) => {
-              dataBayar.push(dt);
-            })
-            .catch((err) => {
-              return res
-                .status(500)
-                .json({ message: "Tidak bisa mendapatkan data pembayaran" });
-            });
-        });
-      }
+      // console.log(dataUsaha);
+      return res.status(200).json({ dataUsaha: dataUsaha });
+    })
+    .catch((error) => {
+      return res.status(500).json({ message: error });
+    });
+});
 
-      return res
-        .status(200)
-        .json({ dataUsaha: dataUsaha, dataBayar: dataBayar });
+// get specific investor
+router.get("/getInvestor/:id", auth, async (req, res) => {
+  const pendanaan = await Pendanaan.findOne({ _id: req.params.id })
+    .populate("userId")
+    .then((data) => {
+      return res.status(200).json(data);
     })
     .catch((error) => {
       return res.status(500).json({ message: error });
