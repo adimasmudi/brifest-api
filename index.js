@@ -9,14 +9,14 @@ const path = require("path");
 const bodyParser = require("body-parser");
 
 // rerquire the dotenv
-require("dotenv").config({ path: __dirname + "/.env" });
+require("dotenv").config();
 
 // mongoose
 const mongoose = require("mongoose");
 
 // connect to mongoose
 mongoose.connect(
-  "mongodb+srv://brifest:brifest@cluster0.hoyf0.mongodb.net/brifest?retryWrites=true&w=majority",
+  process.env.MONGO_URI,
   {
     useNewUrlParser: true,
   }
